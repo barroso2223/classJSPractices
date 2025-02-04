@@ -1,0 +1,16 @@
+#home {
+    width: 100dvw;
+    height: 100dvh;
+    position: relative;
+    z-index: 1;
+    color: white;
+}
+
+#home::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url(/images/barImage2.avif);
+    z-index: -1;
+    opacity: .8;
+}
