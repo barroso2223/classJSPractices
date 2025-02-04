@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Drink Name</h1>
+    <h3><input type="text" id="drink-name-input" placeholder="Enter Drink Name"></h3>
+    <button id="submit-button">Submit</button>
+    <h2 id="drink-name"></h2>
+    <p id="instructions"></p>
+    <span>
+        <ul id="ingredients-list"></ul>
+    </span>
+    <img src="" alt="" height="300px" width="300px" id="drink-image">
+
+    <script>
+        const submitButton = document.getElementById('submit-button')
+        const drinkNameInput = document.getElementById('drink-name-input')
+        const ingredientsList = document.getElementById('ingredients-list')
+
+        submitButton.addEventListener('click', () => {
+            if (!drinkNameInput.value) return
+
+            const drinkName = encodeURIComponent(drinkNameInput.value)
+            const url = `https://www.thecocktaildb.com/api/json/v1/1/search.php?s=${drinkName}`
+
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.drinks && data.drinks.length > 0) {
+                        document.getElementById('drink-name').innerText = data.drinks[0].strDrink
+                        document.getElementById('instructions').innerText = data.drinks[0].strInstructions
+                        document.getElementById('drink-image').src = data.drinks[0].strDrinkThumb
+
+                        ingredientsList.innerHTML = '' // Clear previous ingredients
+
+                        for (let i = 1; i <= 15; i++) {
+                            const ingredient = data.drinks[0][`strIngredient${i}`]
+                            const measure = data.drinks[0][`strMeasure${i}`]
+
+                            if (ingredient) {
+                                const listItem = document.createElement('li')
+                                listItem.innerText = `${measure ? `${measure} of ` : ''}${ingredient}`
+                                ingredientsList.appendChild(listItem)
+                            }
+                        }
+                    } else {
+                        alert('No drink found with that name.');
+                    }
+                })
+                .catch(err => console.log(`Error: ${err}`))
+        })
+    </script>
+</body>
+</html>
