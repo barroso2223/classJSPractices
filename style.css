@@ -1,4 +1,4 @@
-#home {
+/* #home {
     width: 100dvw;
     height: 100dvh;
     position: relative;
@@ -12,5 +12,5 @@
     inset: 0;
     background-image: url(/images/barImage2.avif);
     z-index: -1;
-    opacity: .8;
-}
+    background-size: cover;
+} */

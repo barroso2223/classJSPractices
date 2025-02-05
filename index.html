@@ -3,14 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+    <title>The Midnight Flask</title>
+    <style>
+        /* CSS for the speakeasy entrance and bar */
+        #entrance {
+            background: url('/images/Servicing\ South\ Florida\ Area.png');
+            height: 100vh;
+            background-size: cover;
+            inset: 0;
+            background-repeat: no-repeat;
+            position: relative;
+            overflow: hidden;
+            z-index: 3;
+        }
+
+        .door {
+            background: url('/images/oldWoodDoor.avif');
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            background-size: cover;
+            background-repeat: no-repeat;
+            transition: transform 2s;
+            z-index: 1;
+        }
+
+        .door.left {
+            left: 0;
+        }
+
+        .door.right {
+            right: 0;
+        }
+
+        /* Door open animation */
+        .doors-open .left {
+            transform: translateX(-100%);
+        }
+
+        .doors-open .right {
+            transform: translateX(100%);
+        }
+
+        .age-check {
+            position: absolute;
+            z-index: 2;
+            background: rgba(0,0,0,0.8);
+            padding: 2rem;
+            color: gold;
+            text-align: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #bar {
+            background: url('/images/Servicing\ South\ Florida\ Area.png');
+            height: 100vh;
+            position: absolute;
+            background-size: cover;
+            background-repeat: no-repeat;
+            display: none; /* Hidden by default */
+            z-index: 2;
+        }
+
+        .ad {
+            position: absolute;
+            transition: transform 0.3s;
+        }
+
+        .ad:hover {
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+
+        .poster-left {
+            left: 5%;
+            top: 20%;
+            width: 200px;
+        }
+
+        .neon-sign {
+            right: 10%;
+            top: 10%;
+            width: 300px;
+            filter: drop-shadow(0 0 10px #ff0000);
+        }
+
+        .search-area {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        input {
+            background: rgba(0,0,0,0.7);
+            border: 2px solid gold;
+            color: white;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            position: absolute;
+        }
+
+        #home {
+            display: none; /* Hidden by default */
+        }
+    </style>
 </head>
 <body>
+    <!-- Age Verification & Entrance (Speakeasy Doors) -->
+    <div id="entrance">
+        <div class="door left"></div>
+        <div class="door right"></div>
+        <div class="age-check">
+            <h2>Welcome to The Midnight Flask</h2>
+            <p>Are you 21 or older?</p>
+            <div class="compliance-options">
+                <button onclick="openDoors()">Yes, I'm over 21</button>
+                <button onclick="exitSite()">No, I'm under 21</button>
+            </div>
+            <p class="legal-text">By entering this site, you agree to our <a href="/privacy" target="_blank">Privacy Policy</a> and confirm you meet the legal drinking age in your jurisdiction:cite[1]:cite[9]</p>
+        </div>
+    </div>
+
+    <!-- Main Bar (hidden until verification) -->
+    <div id="bar">
+        <div class="bar-background">
+            <div class="ad poster-left">
+                <a href="[Drizly Affiliate Link]">
+                    <img src="/images/vintageBarPoster.png" alt="Whiskey Delivery">
+                </a>
+            </div>
+            <div class="ad neon-sign">
+                <a href="[Amazon Affiliate Link]">
+                    <img src="/images/cocktailNeon.avif" alt="Bar Tools">
+                </a>
+            </div>
+        </div>
+        <div class="search-area">
+            <input type="text" id="drink-name-input" placeholder="What's your poison, old sport?">
+            <button id="submit-button">Mix Drink</button>
+        </div>
+    </div>
+
+    <!-- Cocktail Details Section -->
     <section id="home">
         <h1>Drink Name</h1>
-        <h3><input type="text" id="drink-name-input" placeholder="Enter Drink Name"></h3>
-        <button id="submit-button">Submit</button>
         <h2 id="drink-name"></h2>
         <p id="instructions"></p>
         <span>
@@ -20,42 +159,98 @@
     </section>
 
     <script>
-        const submitButton = document.getElementById('submit-button')
-        const drinkNameInput = document.getElementById('drink-name-input')
-        const ingredientsList = document.getElementById('ingredients-list')
+        // Age Verification Logic
+        function openDoors() {
+            console.log("Button clicked!"); // Debugging: Check if the function is triggered
+            const entrance = document.getElementById('entrance');
+            const bar = document.getElementById('bar');
+            const home = document.getElementById('home');
+
+            document.querySelector('.age-check').style.display = 'none'; // Hide age verification
+
+            if (!entrance || !bar || !home) {
+                console.error("One or more elements are missing!"); // Debugging: Check if elements exist
+                return;
+            }
+
+            entrance.classList.add('doors-open'); // Add the animation class
+            setTimeout(() => {
+                bar.style.display = 'block'; // Show the bar
+                home.style.display = 'block'; // Show the cocktail details section
+                loadBarScene(); // Initialize main interface
+            }, 2000); // Wait for door animation
+
+            localStorage.setItem('ageVerified', 'true'); // Remember verification
+        }
+
+        // Cocktail Search Logic
+        const submitButton = document.getElementById('submit-button');
+        const drinkNameInput = document.getElementById('drink-name-input');
+        const ingredientsList = document.getElementById('ingredients-list');
 
         submitButton.addEventListener('click', () => {
-            if (!drinkNameInput.value) return
+            if (!drinkNameInput.value) return;
 
-            const drinkName = encodeURIComponent(drinkNameInput.value)
-            const url = `https://www.thecocktaildb.com/api/json/v1/1/search.php?s=${drinkName}`
+            const drinkName = encodeURIComponent(drinkNameInput.value);
+            const url = `https://www.thecocktaildb.com/api/json/v1/1/search.php?s=${drinkName}`;
 
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
                     if (data.drinks && data.drinks.length > 0) {
-                        document.getElementById('drink-name').innerText = data.drinks[0].strDrink
-                        document.getElementById('instructions').innerText = data.drinks[0].strInstructions
-                        document.getElementById('drink-image').src = data.drinks[0].strDrinkThumb
+                        document.getElementById('drink-name').innerText = data.drinks[0].strDrink;
+                        document.getElementById('instructions').innerText = data.drinks[0].strInstructions;
+                        document.getElementById('drink-image').src = data.drinks[0].strDrinkThumb;
 
-                        ingredientsList.innerHTML = '' // Clear previous ingredients
+                        ingredientsList.innerHTML = ''; // Clear previous ingredients
 
                         for (let i = 1; i <= 15; i++) {
-                            const ingredient = data.drinks[0][`strIngredient${i}`]
-                            const measure = data.drinks[0][`strMeasure${i}`]
+                            const ingredient = data.drinks[0][`strIngredient${i}`];
+                            const measure = data.drinks[0][`strMeasure${i}`];
 
                             if (ingredient) {
-                                const listItem = document.createElement('li')
-                                listItem.innerText = `${measure ? `${measure} of ` : ''}${ingredient}`
-                                ingredientsList.appendChild(listItem)
+                                const listItem = document.createElement('li');
+                                listItem.innerText = `${measure ? `${measure} of ` : ''}${ingredient}`;
+                                ingredientsList.appendChild(listItem);
                             }
                         }
                     } else {
                         alert('No drink found with that name.');
                     }
                 })
-                .catch(err => console.log(`Error: ${err}`))
-        })
+                .catch(err => console.log(`Error: ${err}`));
+        });
+
+        // Dynamic Ad Integration
+        function loadBarScene() {
+            // Get location
+            navigator.geolocation.getCurrentPosition(position => {
+                fetchLocalAds(position.coords);
+            }, () => {
+                // If denied, use IP geolocation
+                fetch('https://ipinfo.io/json?token=YOUR_TOKEN')
+                    .then(res => res.json())
+                    .then(data => fetchLocalAds(data));
+            });
+        }
+
+        function fetchLocalAds(location) {
+            // Example: Fetch nearby stores from Yelp
+            fetch(`https://api.yelp.com/v3/businesses/search?term=liquor&latitude=${location.lat}&longitude=${location.lon}`, {
+                headers: {
+                    Authorization: "Bearer YELP_KEY"
+                }
+            })
+                .then(stores => {
+                    // Replace ad placeholders
+                    document.querySelector('.poster-left').innerHTML = `
+                        <a href="${stores[0].url}?utm_source=midnightflask">
+                            <img src="local-ad-template.png" alt="${stores[0].name}">
+                        </a>
+                    `;
+                });
+        }
     </script>
 </body>
 </html>
+
